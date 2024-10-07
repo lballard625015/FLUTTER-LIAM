@@ -1,0 +1,92 @@
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+
+void main() => runApp(const AdaptiveAlertDialogApp());
+
+class AdaptiveAlertDialogApp extends StatelessWidget {
+  const AdaptiveAlertDialogApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      theme: ThemeData(platform: TargetPlatform.iOS, useMaterial3: true),
+      home: Scaffold(
+        appBar: AppBar(title: const Text('AlertDialog Sample')),
+        body: const Center(
+          child: AdaptiveDialogExample(),
+        ),
+      ),
+    );
+  }
+}
+
+class AdaptiveDialogExample extends StatelessWidget {
+  const AdaptiveDialogExample({super.key});
+
+  Widget adaptiveAction({
+    required BuildContext context,
+    required VoidCallback onPressed,
+    required Widget child,
+  }) {
+    final ThemeData theme = Theme.of(context);
+    switch (theme.platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            textStyle: const TextStyle(fontSize: 16),
+          ),
+          onPressed: onPressed,
+          child: child,
+        );
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+        return CupertinoDialogAction(
+          onPressed: onPressed,
+          child: child,
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => showAdaptiveDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog.adaptive(
+          title: Row(
+            children: [
+              Icon(
+                Icons.info_outline,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: 8),
+              const Text('Adaptive AlertDialog Title'),
+            ],
+          ),
+          content: const Text(
+            'This dialog adapts to the platform styling, ensuring that the '
+            'dialog actions and layout are consistent across iOS and Android.',
+            textAlign: TextAlign.center,
+          ),
+          actions: <Widget>[
+            adaptiveAction(
+              context: context,
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              child: const Text('Cancel'),
+            ),
+            adaptiveAction(
+              context: context,
+              onPressed: () => Navigator.pop(context, 'OK'),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      ),
+      child: const Text('Show Adaptive Dialog'),
+    );
+  }
+}
